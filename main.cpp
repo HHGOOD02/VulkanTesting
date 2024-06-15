@@ -9,6 +9,9 @@
 #include <stdexcept>
 #include <cstdlib>
 
+//to pass VkExtensionProperties as an array
+#include <vector>
+
 class HelloTriangleApplication {
 
   const uint32_t WIDTH = 800;
@@ -38,17 +41,17 @@ private:
 
   }
 
-  void initVulkan() {
-  
-  private:
-    VkInstance instance;
-
+void initVulkan() {
+    
     createInstance();
-
+  
   }
 
-  void createInstance(){
+private:
+  VkInstance instance;
 
+void createInstance() { 
+    
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = "Test Triangle";
@@ -76,7 +79,6 @@ private:
     if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
       throw std::runtime_error("failed to create instance");
     }
-
   }
 
   void mainLoop() {
@@ -86,6 +88,8 @@ private:
   }
 
   void cleanup() {
+
+    vkDestroyInstance(instance, nullptr);
 
     glfwDestroyWindow(window);
 
