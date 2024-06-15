@@ -27,4 +27,10 @@ while(!glfwWindowShouldClose(window)) {
   glfwPollEvents();
 }
 
+glfwDestroyWindow(window);
 
+glfwTerminate();
+
+return 0;
+
+}
