@@ -9,8 +9,8 @@
 #include <stdexcept>
 #include <cstdlib>
 
-//to pass VkExtensionProperties as an array
 #include <vector>
+#include <map>
 
 class HelloTriangleApplication {
 
@@ -44,8 +44,85 @@ private:
 void initVulkan() {
     
     createInstance();
-  
+
+    pickPhysicalDevice();
+
   }
+
+void pickPhysicalDevice() {
+
+    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+    if (deviceCount == 0) {
+      throw std::runtime_error("No Vulkan-compatible GPUs detected");
+    }
+
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+    for (const auto& device : devices) {
+      if (isDeviceSuitable(device)){
+        physicalDevice = device;
+        break;
+      }
+    }
+
+    if (physicalDevice == VK_NULL_HANDLE) {
+      throw std::runtime_error("Failed to find Vulkan-compatible GPU");
+    }
+
+  }
+
+bool isDeviceSuitable(VkPhysicalDevice device) {
+    
+    VkPhysicalDeviceProperties deviceProperties;
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceProperties(device, &deviceProperties);
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+    return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader;
+
+    }
+
+void pickPhysicalDevice() {
+
+    std::multimap<int, VkPhysicalDevice> candidates;
+
+    for (const auto& device : devices) {
+      int score = rateDeviceSuitability(device);
+      candidates.insert(std::make_pair(score, device));
+    
+    }
+
+    if (candidates.rbegin()->first > 0) {
+      physicalDevice = candidates.rbegin()->second;
+    } else {
+      throw std::runtime_error("failed to find Vulkan-compatible GPU");
+    }
+
+  }
+
+  int rateDeviceSuitability(VkPhysicalDevice device) {
+
+    int score = 0;
+
+    if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_dISCRETE_GPU) {
+      score += 1000;
+    }
+
+    score += deviceProperties.limits.maxImageDimension2D;
+
+    if (!deviceFeatures.geometryShader) {
+      return 0;
+    }
+
+    return score;
+
+  }
+
 
 private:
   VkInstance instance;
